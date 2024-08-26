@@ -1,10 +1,12 @@
-
 import sys
+from datetime import datetime
 
 class RestaurantReservationSystem:
     def __init__(self):
         self.users = {}
         self.logged_in_user = None
+        self.orders = []
+
         self.menu = {
             "1": {
                 "name": "Book a table",
@@ -12,15 +14,15 @@ class RestaurantReservationSystem:
                     "1": {"name": "Small table", "price": 20},
                     "2": {"name": "Medium table", "price": 30},
                     "3": {"name": "Large table", "price": 40},
-                    "4": {"name":"extra large table", "price": 50}
+                    "4": {"name": "Extra large table", "price": 50}
                 }
             },
             "2": {
                 "name": "Preorder food",
                 "options": {
-                    "1": {"name": "Jollof rice with chicken", "price": 15},
-                    "2": {"name": "Fried rice with chicken", "price": 18},
-                    "3": {"name": "pounded yam and egusi soup", "price": 25},
+                    "1": {"name": "Jollof rice", "price": 15},
+                    "2": {"name": "Fried rice", "price": 18},
+                    "3": {"name": "Pounded yam and egusi", "price": 25},
                     "4": {"name": "Suya", "price": 10}
                 }
             },
@@ -28,7 +30,7 @@ class RestaurantReservationSystem:
                 "name": "Preorder drink",
                 "options": {
                     "1": {"name": "Non alcoholic drink", "price": 5},
-                    "2": {"name": "Wine", "price": 10},
+                    "2": {"name": "Wines", "price": 10},
                     "3": {"name": "Malt", "price": 3},
                     "4": {"name": "Mineral", "price": 2}
                 }
@@ -48,9 +50,8 @@ class RestaurantReservationSystem:
                     "1": {"name": "Small suite", "price": 50},
                     "2": {"name": "Medium suite", "price": 100}
                 }
-            },
+            }
         }
-        self.orders = []
 
     def signup(self):
         first_name = input(str("Enter your first name: "))
@@ -117,10 +118,21 @@ class RestaurantReservationSystem:
         print(f"\n{self.menu[choice]['name']} Options:")
         for opt, details in options.items():
             print(f"{opt}. {details['name']} - ${details['price']}")
+        
         sub_choice = input("Select an option: ")
 
         if sub_choice in options:
-            self.take_order(options[sub_choice])
+            if choice in ["1", "4"]:
+                date = input("Enter the date (YYYY-MM-DD): ")
+                time = input("Enter the time (HH:MM): ")
+                item = {**options[sub_choice], "date": date, "time": time}
+                self.take_order(item)
+            elif choice == "5":
+                date = input("Enter the date (YYYY-MM-DD): ")
+                item = {**options[sub_choice], "date": date}
+                self.take_order(item)
+            else:
+                self.take_order(options[sub_choice])
         else:
             print("Invalid choice. Returning to main menu.")
 
@@ -136,7 +148,10 @@ class RestaurantReservationSystem:
         total = 0
         print("\nYour Order:")
         for item in self.orders:
-            print(f"{item['name']} - ${item['price']}")
+            if "date" in item:
+                print(f"{item['name']} on {item.get('date', '')} at {item.get('time', '')} - ${item['price']}")
+            else:
+                print(f"{item['name']} - ${item['price']}")
             total += item["price"]
         print(f"Total: ${total}")
         self.payment_options(total)
@@ -155,6 +170,7 @@ class RestaurantReservationSystem:
             print("Invalid payment option. Please try again.")
 
     def rate_experience(self):
+        print("\nRate your experience:")
         print("1. Excellent")
         print("2. Good")
         print("3. Fair")
@@ -175,7 +191,7 @@ def main():
     system = RestaurantReservationSystem()
 
     while True:
-        print("\nWelcome to the BEP05 Restaurant Reservation System!")
+        print("\nWelcome to BEP05 Restaurant Reservation System!")
         print("1. Sign-up")
         print("2. Login")
         print("3. Exit")
