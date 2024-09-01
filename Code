@@ -53,29 +53,64 @@ class RestaurantReservationSystem:
             }
         }
 
+
     def signup(self):
-        first_name = input(str("Enter your first name: "))
-        last_name = input(str("Enter your last name: "))
-        phone = input("Enter your phone number: ")
-        email = input("Enter your email: ")
-        if '@' and '.' not in email:
-            print("please enter a valid email address")
-            return
-        username = input("Create a username: ")
+        while True:
+            try:
+                first_name = input(str("Enter your first name: "))
+                if valid_name(first_name):
+                    break
+                else:
+                    print("invalid input, please enter only alphabets")
+            except ValueError:
+                print("please enter alphabets only")
 
-        if username in self.users:
-            print("Username already exists. Try logging in.")
-            return
+        while True:
+            try:
+                last_name = input(str("Enter your last name: "))
+                if valid_name(last_name):
+                    break
+                else:
+                    print("invalid input, please enter only alphabets")
+            except ValueError:
+                print("please enter alphabets only")
 
-        password = input("Create a password: ")
-        self.users[username] = {
+        while True:
+            try:
+                phone = input("Enter your phone number: ")
+                break
+            except ValueError:
+                print("enter a valid phone number")
+
+        while True:
+            try:
+                email = input("Enter your email: ")
+                if email.count('@') ==1 and email.count('.') == 1:
+                    break
+                else:
+                    print("please enter a valid email address")
+            except ValueError:
+                print("enter a valid email address")
+
+        while True:
+            username = input("Create a username: ")
+            if username in self.users:
+                print("Username already exists. Try logging in or try another username.")
+                return
+            else:
+                break
+            
+        while True:
+            password = input("Create a password: ")
+            self.users[username] = {
             "first_name": first_name,
             "last_name": last_name,
             "phone": phone,
             "email": email,
             "password": password
-        }
-        print("Sign-up successful! Please log in.")
+            }
+            print("\nSign-up successful! Please log in.")
+            break
 
     def login(self):
         username = input("Enter username: ")
@@ -122,15 +157,28 @@ class RestaurantReservationSystem:
         sub_choice = input("Select an option: ")
 
         if sub_choice in options:
-            if choice in ["1", "4"]:
-                date = input("Enter the date (YYYY-MM-DD): ")
-                time = input("Enter the time (HH:MM): ")
-                item = {**options[sub_choice], "date": date, "time": time}
-                self.take_order(item)
-            elif choice == "5":
-                date = input("Enter the date (YYYY-MM-DD): ")
-                item = {**options[sub_choice], "date": date}
-                self.take_order(item)
+            if choice in ["1", "4", "5"]:
+                while True:
+                    try:
+                        date = input("Enter the date (YYYY-MM-DD): ")
+                        user_date = datetime.strptime(date, "%Y-%m-%d").date()
+                        time = input("enter the time in HH:MM: ")
+                        user_time = datetime.strptime(time, "%H:%M").time()
+                        user_datetime = datetime.combine(user_date, user_time)
+                        item = {**options[sub_choice], "date": date, "time": time}
+                        
+
+                        if user_datetime > datetime.now():
+                            self.take_order(item)
+                            return user_datetime
+                            
+                        else:
+                            print("please enter a valid date")
+                            return
+                        
+                    except ValueError:
+                        print("Invalid format, please enter date in the format YYYY-MM-DD, and time in the format HH:MM")
+
             else:
                 self.take_order(options[sub_choice])
         else:
@@ -186,6 +234,9 @@ class RestaurantReservationSystem:
         print(f"Goodbye, {self.users[self.logged_in_user]['first_name']}!")
         self.logged_in_user = None
         self.orders = []
+
+def valid_name(name):
+        return name.isalpha()
 
 def main():
     system = RestaurantReservationSystem()
